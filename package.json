@@ -1,0 +1,17 @@
+{
+  "name": "countries_and_weather",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "countryjs": "^1.8.0",
+    "express": "^4.16.3",
+    "geojson-polygon-center": "0.0.0",
+    "node-fetch": "^2.1.1"
+  }
+}
