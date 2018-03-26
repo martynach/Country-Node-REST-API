@@ -12,12 +12,11 @@ const weatherKey = '2c1130f49b3fd9d694aff9d1034a413f';
 app.get('/countries', (req, res) => {
     console.log("Query for all countries.");
     const allCountriesArr = countryjs.all();
-    const result = allCountriesArr.map(country => {
-        return {
-            name: country.name,
-            code: country.ISO[2],
-        }
-    });
+    const result = allCountriesArr.map(country => ({
+        name: country.name,
+        code: country.ISO[2],
+    })
+    );
 
     res.send(result);
 
@@ -27,7 +26,7 @@ app.get('/countries/:code', (req, res) => {
     const countryCode = req.params.code;
     console.log(`Query for country with ${countryCode} code.`);
 
-    const error = getErrorResponseIfCountryDoesNotexist(countryCode);
+    const error = getErrorResponseIfCountryDoesNotExist(countryCode);
     if(error) {
         res.send(error);
         return;
@@ -41,7 +40,7 @@ app.get('/countries/:code/provinces', (req, res) => {
     const countryCode = req.params.code;
     console.log(`Query for provinces of country with ${countryCode} code.`);
 
-    const error = getErrorResponseIfCountryDoesNotexist(countryCode);
+    const error = getErrorResponseIfCountryDoesNotExist(countryCode);
     if(error) {
         res.send(error);
         return;
@@ -55,7 +54,7 @@ app.get('/countries/:code/wiki', (req, res) => {
     const countryCode = req.params.code;
     console.log(`Query for wiki redirection for country with ${countryCode} code.`);
 
-    const error = getErrorResponseIfCountryDoesNotexist(countryCode);
+    const error = getErrorResponseIfCountryDoesNotExist(countryCode);
     if(error) {
         res.send(error);
         return;
@@ -69,7 +68,7 @@ app.get('/countries/:code/center', (req, res) => {
     const countryCode = req.params.code;
     console.log(`Query for coordinates of country with ${countryCode} code. Tricky one ;-D`);
 
-    const error = getErrorResponseIfCountryDoesNotexist(countryCode);
+    const error = getErrorResponseIfCountryDoesNotExist(countryCode);
     if(error) {
         res.send(error);
         return;
@@ -84,7 +83,7 @@ app.get('/countries/:code/weather/capital', (req, res) => {
     const countryCode = req.params.code;
     console.log(`Query for weather in capital city of country with ${countryCode} code.`);
 
-    const error = getErrorResponseIfCountryDoesNotexist(countryCode);
+    const error = getErrorResponseIfCountryDoesNotExist(countryCode);
     if(error) {
         res.send(error);
         return;
@@ -129,7 +128,7 @@ app.get('/weatherMath/humidityMath', (req, res) => {
     }
 
     (async () => {
-        res.send(await getJsonResponseForWhatCalculation("pressure", req.query.countries));
+        res.send(await getJsonResponseForWhatCalculation("humidity", req.query.countries));
     })();
 
 });
@@ -219,13 +218,9 @@ async function getJsonResponseForWhatCalculation(what, countryCodes) {
         resObject[what + "Min"] = minData[what];
     }
 
-    let sum = weatherDataAndCodesArray.reduce((prev, curr) => {
-        if (curr.temp) {
-            return prev + curr[what];
-        } else {
-            return prev;
-        }
-    }, 0);
+    let sum = weatherDataAndCodesArray.reduce((prev, curr) =>
+        curr[what] ? prev + curr[what] : prev
+        , 0);
 
     resObject[what + "Avg"] = sum / weatherDataAndCodesArray.length;
 
@@ -262,7 +257,7 @@ async function _getWeatherDataArray(codesArr) {
             })
             .catch(error => {
                 console.log("Logging error:", error.message);
-                return new Promise(res => res({code, msg: "No data"}));
+                return {code, msg: "No data"};
             });
     }));
 }
