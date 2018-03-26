@@ -79,12 +79,12 @@ app.get('/countries/:code/center', (req, res) => {
     res.send(center);
 });
 
-app.get('/countries/:code/weather/capital', (req, res) => {
+app.get('/countries/:code/weather/capital', async (req, res) => {
     const countryCode = req.params.code;
     console.log(`Query for weather in capital city of country with ${countryCode} code.`);
 
     const error = getErrorResponseIfCountryDoesNotExist(countryCode);
-    if(error) {
+    if (error) {
         res.send(error);
         return;
     }
@@ -92,17 +92,15 @@ app.get('/countries/:code/weather/capital', (req, res) => {
     const capital = countryjs.capital(countryCode);
 
     let weatherQueryUrl = weatherUrl + `?q=${capital},${countryCode}&appid=${weatherKey}`;
-    _getWeatherData(weatherQueryUrl)
-    .then(object => {
-        const {weather, main, wind, rain} = object;
+    try {
+        const object = await _getWeatherData(weatherQueryUrl)
+        const { weather, main, wind, rain } = object;
         console.log(object);
         res.send(object);
-    })
-    .catch(error => {
+    } catch (error) {
         console.log("Logging error:", error.message);
-        res.send(error.message);
-    });
-
+        res.send(JSON.stringify({ errorMessage: error.message }));
+    }
 });
 
 app.get('/weatherMath/temperatureMath', (req, res) => {
@@ -165,8 +163,8 @@ function getErrorResponseIfCountryDoesNotExist(code) {
  */
 function validateCountriesAndGetErrorResponse(codesString) {
 
-    if(!codesString) {
-        return JSON.stringify({errorMessage: "No country codes provided."});
+    if (!codesString) {
+        return JSON.stringify({ errorMessage: "No country codes provided." });
     }
 
     const codesArr = codesString.split(",");
@@ -223,7 +221,6 @@ async function getJsonResponseForWhatCalculation(what, countryCodes) {
         , 0);
 
     resObject[what + "Avg"] = sum / weatherDataAndCodesArray.length;
-
     return resObject;
 }
 
@@ -234,15 +231,14 @@ app.listen(3000, () => {
 });
 
 
-function _getWeatherData(weatherQueryUrl) {
-    return fetch(weatherQueryUrl)
-        .then((response) => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error("Connection lost!");
-            }
-        });
+async function _getWeatherData(weatherQueryUrl) {
+    const response = await fetch(weatherQueryUrl);
+
+    if (response.ok) {
+        return response.json();
+    } else {
+        throw new Error("Connection lost!");
+    }
 }
 
 async function _getWeatherDataArray(codesArr) {
@@ -250,15 +246,16 @@ async function _getWeatherDataArray(codesArr) {
         const capital = countryjs.capital(code);
         let weatherQueryUrl = weatherUrl + `?q=${capital},${code}&appid=${weatherKey}`;
 
-        return _getWeatherData(weatherQueryUrl)
-            .then(object => {
-                const { temp, humidity, pressure } = object.main;
-                return { temp, humidity, pressure, code };
-            })
-            .catch(error => {
-                console.log("Logging error:", error.message);
-                return {code, msg: "No data"};
-            });
+        try {
+            const object = await _getWeatherData(weatherQueryUrl)
+
+            const { temp, humidity, pressure } = object.main;
+            return { temp, humidity, pressure, code };
+
+        } catch (error) {
+            console.log("Logging error:", error.message);
+            return { code, msg: "No data" };
+        }
     }));
 }
 
