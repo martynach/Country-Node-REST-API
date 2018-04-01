@@ -9,6 +9,9 @@ const app = express();
 const weatherUrl = 'http://api.openweathermap.org/data/2.5/weather';
 const weatherKey = process.env.API_KEY;
 
+app.get('/', (req, res) => {
+    res.redirect('/countries');
+});
 
 app.get('/countries', (req, res) => {
     console.log('Query for all countries.');
