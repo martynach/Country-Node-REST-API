@@ -2,7 +2,7 @@ const express = require('express');
 const countryjs = require('countryjs');
 const polygonCenter = require('geojson-polygon-center');
 const fetch = require('node-fetch');
-const dotenv = require('dotenv').config();
+require('dotenv').config();
 
 const app = express();
 
@@ -11,7 +11,7 @@ const weatherKey = process.env.API_KEY;
 
 
 app.get('/countries', (req, res) => {
-    console.log("Query for all countries.");
+    console.log('Query for all countries.');
     const allCountriesArr = countryjs.all();
     const result = allCountriesArr.map(country => ({
         name: country.name,
@@ -94,12 +94,11 @@ app.get('/countries/:code/weather/capital', async (req, res) => {
 
     let weatherQueryUrl = weatherUrl + `?q=${capital},${countryCode}&appid=${weatherKey}`;
     try {
-        const object = await _getWeatherData(weatherQueryUrl)
-        const { weather, main, wind, rain } = object;
+        const object = await _getWeatherData(weatherQueryUrl);
         console.log(object);
         res.send(object);
     } catch (error) {
-        console.log("Logging error:", error.message);
+        console.log('Logging error:', error.message);
         res.send(JSON.stringify({ errorMessage: error.message }));
     }
 });
@@ -113,7 +112,7 @@ app.get('/weatherMath/temperatureMath', (req, res) => {
     }
 
     (async () => {
-        res.send(await getJsonResponseForWhatCalculation("temp", req.query.countries));
+        res.send(await getJsonResponseForWhatCalculation('temp', req.query.countries));
     })();
 
 });
@@ -127,7 +126,7 @@ app.get('/weatherMath/humidityMath', (req, res) => {
     }
 
     (async () => {
-        res.send(await getJsonResponseForWhatCalculation("humidity", req.query.countries));
+        res.send(await getJsonResponseForWhatCalculation('humidity', req.query.countries));
     })();
 
 });
@@ -141,7 +140,7 @@ app.get('/weatherMath/pressureMath', (req, res) => {
     }
 
     (async () => {
-        res.send(await getJsonResponseForWhatCalculation("pressure", req.query.countries));
+        res.send(await getJsonResponseForWhatCalculation('pressure', req.query.countries));
     })();
 
 });
@@ -165,11 +164,11 @@ function getErrorResponseIfCountryDoesNotExist(code) {
 function validateCountriesAndGetErrorResponse(codesString) {
 
     if (!codesString) {
-        return JSON.stringify({ errorMessage: "No country codes provided." });
+        return JSON.stringify({ errorMessage: 'No country codes provided.' });
     }
 
-    const codesArr = codesString.split(",");
-    for (code of codesArr) {
+    const codesArr = codesString.split(',');
+    for (const code of codesArr) {
         const error = getErrorResponseIfCountryDoesNotExist(code);
         if (error) {
             return error;
@@ -184,9 +183,9 @@ function validateCountriesAndGetErrorResponse(codesString) {
  * @param {*} countryCodes - valid country codes
  */
 async function getJsonResponseForWhatCalculation(what, countryCodes) {
-    console.log("Query for ", what, "analysis for countries with codes:", countryCodes);
+    console.log('Query for ', what, 'analysis for countries with codes:', countryCodes);
 
-    const codesArr = countryCodes.split(",");
+    const codesArr = countryCodes.split(',');
     const weatherDataAndCodesArray = await _getWeatherDataArray(codesArr);
 
     let data = {};
@@ -208,27 +207,27 @@ async function getJsonResponseForWhatCalculation(what, countryCodes) {
     });
 
     if (maxData) {
-        resObject["countryMax" + what] = maxData.code;
-        resObject[what + "Max"] = maxData[what];
+        resObject['countryMax' + what] = maxData.code;
+        resObject[what + 'Max'] = maxData[what];
     }
 
     if (minData) {
-        resObject["countryMin" + what] = minData.code;
-        resObject[what + "Min"] = minData[what];
+        resObject['countryMin' + what] = minData.code;
+        resObject[what + 'Min'] = minData[what];
     }
 
     let sum = weatherDataAndCodesArray.reduce((prev, curr) =>
         curr[what] ? prev + curr[what] : prev
         , 0);
 
-    resObject[what + "Avg"] = sum / weatherDataAndCodesArray.length;
+    resObject[what + 'Avg'] = sum / weatherDataAndCodesArray.length;
     return resObject;
 }
 
 
 
 app.listen(3000, () => {
-    console.log(`Server up and running!`);
+    console.log('Server up and running!');
 });
 
 
@@ -238,7 +237,7 @@ async function _getWeatherData(weatherQueryUrl) {
     if (response.ok) {
         return response.json();
     } else {
-        throw new Error("Connection lost!");
+        throw new Error('Connection lost!');
     }
 }
 
@@ -248,14 +247,13 @@ async function _getWeatherDataArray(codesArr) {
         let weatherQueryUrl = weatherUrl + `?q=${capital},${code}&appid=${weatherKey}`;
 
         try {
-            const object = await _getWeatherData(weatherQueryUrl)
-
+            const object = await _getWeatherData(weatherQueryUrl);
             const { temp, humidity, pressure } = object.main;
             return { temp, humidity, pressure, code };
 
         } catch (error) {
-            console.log("Logging error:", error.message);
-            return { code, msg: "No data" };
+            console.log('Logging error:', error.message);
+            return { code, msg: 'No data' };
         }
     }));
 }
