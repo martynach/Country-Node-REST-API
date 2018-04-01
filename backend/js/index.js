@@ -2,11 +2,12 @@ const express = require('express');
 const countryjs = require('countryjs');
 const polygonCenter = require('geojson-polygon-center');
 const fetch = require('node-fetch');
+const dotenv = require('dotenv').config();
 
 const app = express();
 
 const weatherUrl = 'http://api.openweathermap.org/data/2.5/weather';
-const weatherKey = '2c1130f49b3fd9d694aff9d1034a413f';
+const weatherKey = process.env.API_KEY;
 
 
 app.get('/countries', (req, res) => {
