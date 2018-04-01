@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "countryjs": "^1.8.0",
+    "dotenv": "^5.0.1",
     "express": "^4.16.3",
     "geojson-polygon-center": "0.0.0",
     "node-fetch": "^2.1.1"
