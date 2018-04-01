@@ -227,8 +227,6 @@ async function getJsonResponseForWhatCalculation(what, countryCodes) {
     return resObject;
 }
 
-
-
 app.listen(process.env.PORT || 3000, () => {
     console.log('Server up and running!');
 });
